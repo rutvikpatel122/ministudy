@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:webview_flutter/webview_flutter.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 void main() {
   runApp(const MyApp());
@@ -11,34 +11,32 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Webview Demo',
+      title: 'Flutter URL Launcher Demo',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const WebViewPage(
-          url: 'http://api.ministudy.in'), // Replace with your desired URL
+      home: const UrlLauncherPage(),
     );
   }
 }
 
-class WebViewPage extends StatefulWidget {
-  final String url;
-  const WebViewPage({super.key, required this.url});
+class UrlLauncherPage extends StatefulWidget {
+  const UrlLauncherPage({super.key});
 
   @override
-  State<WebViewPage> createState() => _WebViewPageState();
+  State<UrlLauncherPage> createState() => _UrlLauncherPageState();
 }
 
-class _WebViewPageState extends State<WebViewPage> {
+class _UrlLauncherPageState extends State<UrlLauncherPage> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('WebView Example'),
-      ),
-      body: WebViewPage(
-        url: widget.url,
+    return SafeArea(
+      child: InAppWebView(
+        initialUrlRequest: URLRequest(url: WebUri("https://www.ministudy.in/")),
+        onLoadStart: (controller, url) async {
+          setState(() {});
+        },
       ),
     );
   }
