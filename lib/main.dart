@@ -33,7 +33,8 @@ void main() {
 bool _requireConsent = false;
 String deviceId = '123'; // Initialize deviceId
 String version = ''; // Initialize version
-String url = 'https://weare.skillters.in/parentsside/parent_login?deviceId=$deviceId&version=$version';
+String url =
+    'https://weare.skillters.in/teacherside/teacher_login/?deviceId=$deviceId&version=$version';
 // Platform messages are asynchronous, so we initialize in an async method.
 Future<void> initPlatformState() async {
   OneSignal.Debug.setLogLevel(OSLogLevel.verbose);
