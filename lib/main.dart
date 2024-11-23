@@ -193,37 +193,29 @@ class _UrlLauncherPageState extends State<UrlLauncherPage> {
           return Future.value(true); // Allow app to close
         }
       },
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(
-            url,
-            style: const TextStyle(fontSize: 12),
+      child: SafeArea(
+        child: InAppWebView(
+          pullToRefreshController: _pullToRefreshController,
+          initialUrlRequest: URLRequest(
+            url: WebUri(url), // Initial URL with deviceId
           ),
-        ),
-        body: SafeArea(
-          child: InAppWebView(
-            pullToRefreshController: _pullToRefreshController,
-            initialUrlRequest: URLRequest(
-              url: WebUri(url), // Initial URL with deviceId
-            ),
-            onWebViewCreated: (controller) {
-              _webViewController = controller;
-            },
-            onLoadStart: (controller, url) async {
-              setState(() {});
-            },
-            onLoadStop: (controller, url) async {
-              bool canGoBackResult = await controller.canGoBack();
-              setState(() {
-                canGoBack = canGoBackResult;
-              });
-              _pullToRefreshController
-                  ?.endRefreshing(); // Stop refreshing after loading completes
-            },
-            onConsoleMessage: (controller, consoleMessage) {
-              print(consoleMessage);
-            },
-          ),
+          onWebViewCreated: (controller) {
+            _webViewController = controller;
+          },
+          onLoadStart: (controller, url) async {
+            setState(() {});
+          },
+          onLoadStop: (controller, url) async {
+            bool canGoBackResult = await controller.canGoBack();
+            setState(() {
+              canGoBack = canGoBackResult;
+            });
+            _pullToRefreshController
+                ?.endRefreshing(); // Stop refreshing after loading completes
+          },
+          onConsoleMessage: (controller, consoleMessage) {
+            print(consoleMessage);
+          },
         ),
       ),
     );
