@@ -2,38 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+
 import 'package:package_info_plus/package_info_plus.dart';
-
-Future<String> getAppVersion() async {
-  PackageInfo packageInfo = await PackageInfo.fromPlatform();
-  version = packageInfo.version;
-  print('version $version ${packageInfo.version}');
-  return packageInfo.version; // e.g., "1.0.1"
-}
-
-Future<String> getAppDeviceId() async {
-  String deviceId = '123'; // Default value
-  // Retrieve the current device ID directly
-  deviceId = OneSignal.User.pushSubscription.id ?? '123';
-
-  // Optionally, if you want to add a listener for future updates:
-  OneSignal.User.pushSubscription.addObserver((state) {
-    deviceId = OneSignal.User.pushSubscription.id ?? '123';
-    print('Device ID updated: $deviceId');
-  });
-
-  return deviceId;
-}
 
 void main() {
   runApp(const MyApp());
   initPlatformState();
 }
 
+String Weburl = 'https://weare.skillters.in/studentside/Student_Login';
 bool _requireConsent = false;
 String deviceId = '123'; // Initialize deviceId
 String version = ''; // Initialize version
-String url = 'https://weare.skillters.in?deviceId=$deviceId&version=$version';
+Future<String> getAppVersion() async {
+  PackageInfo packageInfo = await PackageInfo.fromPlatform();
+  return packageInfo.version; // e.g., "1.0.1"
+}
+
+Future<void> _initializeVersion() async {
+  version = await getAppVersion();
+}
+
 // Platform messages are asynchronous, so we initialize in an async method.
 Future<void> initPlatformState() async {
   OneSignal.Debug.setLogLevel(OSLogLevel.verbose);
@@ -77,6 +66,13 @@ Future<void> initPlatformState() async {
 }
 
 late InAppWebViewController _webViewController;
+void _loadWebPageWithUrl(String url) {
+  _webViewController.loadUrl(
+    urlRequest: URLRequest(
+      url: WebUri(url),
+    ),
+  );
+}
 
 // Function to explicitly ask for notification permission
 Future<void> _askNotificationPermission() async {
@@ -92,7 +88,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Skillters Educational Portal',
+      title: 'MiniStudy Educational Portal',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
@@ -114,28 +110,22 @@ class _UrlLauncherPageState extends State<UrlLauncherPage> {
   late InAppWebViewController _webViewController;
   bool canGoBack = false;
   PullToRefreshController? _pullToRefreshController;
-  void initHandler() async {
-    await getAppVersion();
-    await getAppDeviceId();
-    print('init device id $deviceId version $version');
-  }
 
   @override
   void initState() {
-    super.initState();
-    initHandler();
-    print('device id $deviceId version $version');
-    print(url);
+    checkInternetConnection();
+    _initializeVersion();
 
     // Set up OneSignal observer and refresh WebView with deviceId
     OneSignal.User.pushSubscription.addObserver((state) {
-      setState(() {
-        deviceId = OneSignal.User.pushSubscription.id ?? '123';
-      });
+      deviceId = OneSignal.User.pushSubscription.id ?? '123';
       print('Updated deviceId: $deviceId');
-      _loadWebPageWithUrl(url);
-      checkInternetConnection();
-      print('device id $deviceId version $version');
+      print('${Weburl}?deviceId=$deviceId&version=$version');
+      _loadWebPageWithUrl(
+          '${Weburl}?deviceId=$deviceId&version=$version'); // Reload web page with updated deviceId
+      setState(() {});
+
+      super.initState();
     });
 
     _pullToRefreshController = PullToRefreshController(
@@ -145,7 +135,7 @@ class _UrlLauncherPageState extends State<UrlLauncherPage> {
     );
 
     // Ask for notification permission when app starts
-    Future.delayed(const Duration(seconds: 4), () {
+    Future.delayed(Duration(seconds: 3), () {
       _askNotificationPermission();
     });
   }
@@ -159,7 +149,7 @@ class _UrlLauncherPageState extends State<UrlLauncherPage> {
     }
 
     Connectivity().onConnectivityChanged.listen((result) {
-      if (result == ConnectivityResult.none) {
+      if (result.contains(ConnectivityResult.none)) {
         _showNoInternetDialog();
       }
     });
@@ -196,7 +186,8 @@ class _UrlLauncherPageState extends State<UrlLauncherPage> {
         child: InAppWebView(
           pullToRefreshController: _pullToRefreshController,
           initialUrlRequest: URLRequest(
-            url: WebUri(url), // Initial URL with deviceId
+            url: WebUri(
+                '${Weburl}?deviceId=$deviceId&version=$version'), // Initial URL with deviceId
           ),
           onWebViewCreated: (controller) {
             _webViewController = controller;
@@ -219,15 +210,6 @@ class _UrlLauncherPageState extends State<UrlLauncherPage> {
       ),
     );
   }
-
-  // Function to load the web page with deviceId as a URL parameter
-  // void _loadWebPageWithDeviceId() {
-  //   _webViewController.loadUrl(
-  //     urlRequest: URLRequest(
-  //       url: WebUri("https://api.ministudy.in?deviceId=$deviceId"),
-  //     ),
-  //   );
-  // }
 
   // Function to load the web page with a specific URL (from notification click)
   void _loadWebPageWithUrl(String url) {
