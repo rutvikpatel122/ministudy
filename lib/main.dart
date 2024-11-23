@@ -10,7 +10,7 @@ void main() {
   initPlatformState();
 }
 
-String Weburl = 'https://weare.skillters.in/studentside/Student_Login';
+String Weburl = 'https://api.ministudy.in';
 bool _requireConsent = false;
 String deviceId = '123'; // Initialize deviceId
 String version = ''; // Initialize version
@@ -120,9 +120,9 @@ class _UrlLauncherPageState extends State<UrlLauncherPage> {
     OneSignal.User.pushSubscription.addObserver((state) {
       deviceId = OneSignal.User.pushSubscription.id ?? '123';
       print('Updated deviceId: $deviceId');
-      print('${Weburl}?deviceId=$deviceId&version=$version');
+      print('$Weburl?deviceId=$deviceId&version=$version');
       _loadWebPageWithUrl(
-          '${Weburl}?deviceId=$deviceId&version=$version'); // Reload web page with updated deviceId
+          '$Weburl?deviceId=$deviceId&version=$version'); // Reload web page with updated deviceId
       setState(() {});
 
       super.initState();
@@ -135,7 +135,7 @@ class _UrlLauncherPageState extends State<UrlLauncherPage> {
     );
 
     // Ask for notification permission when app starts
-    Future.delayed(Duration(seconds: 3), () {
+    Future.delayed(const Duration(seconds: 3), () {
       _askNotificationPermission();
     });
   }
@@ -187,7 +187,7 @@ class _UrlLauncherPageState extends State<UrlLauncherPage> {
           pullToRefreshController: _pullToRefreshController,
           initialUrlRequest: URLRequest(
             url: WebUri(
-                '${Weburl}?deviceId=$deviceId&version=$version'), // Initial URL with deviceId
+                '$Weburl?deviceId=$deviceId&version=$version'), // Initial URL with deviceId
           ),
           onWebViewCreated: (controller) {
             _webViewController = controller;
